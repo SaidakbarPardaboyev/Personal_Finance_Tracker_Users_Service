@@ -1,0 +1,223 @@
+basePath: /auth
+definitions:
+  models.ForgotPasswordReq:
+    properties:
+      email:
+        type: string
+    type: object
+  models.RequestLogin:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.RequestRefreshToken:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  models.RequestRegister:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      native_language:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.ResetPasswordReq:
+    properties:
+      new_password:
+        type: string
+      verification_code:
+        type: string
+    type: object
+  models.Response:
+    properties:
+      data: {}
+      description:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+host: localhost:9999
+info:
+  contact:
+    email: '"pardaboyevsaidakbar103@gmail.com"'
+    name: Saidakbar
+    url: http://www.support_me_with_smile
+  description: This is the auth service of TravelTales app
+  title: Auth Service
+  version: "1.0"
+paths:
+  /forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: it is used when user forgot password
+      parameters:
+      - description: forgot_password
+        in: body
+        name: forgot_password
+        required: true
+        schema:
+          $ref: '#/definitions/models.ForgotPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      tags:
+      - Auth
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: this API for login new user
+      parameters:
+      - description: login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      tags:
+      - Auth
+  /refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: this API for refresh user access token
+      parameters:
+      - description: refresh token is required
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestRefreshToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      tags:
+      - Auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: this API for register new user
+      parameters:
+      - description: register
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestRegister'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      tags:
+      - Auth
+  /reset-password:
+    post:
+      consumes:
+      - application/json
+      description: this API for reset user password
+      parameters:
+      - description: reset-password
+        in: body
+        name: reset-password
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      tags:
+      - Auth
+swagger: "2.0"
