@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
 	Create(ctx context.Context, in *CreateUser, opts ...grpc.CallOption) (*User, error)
-	GetByEmail(ctx context.Context, in *Email, opts ...grpc.CallOption) (*User, error)
+	GetByEmail(ctx context.Context, in *Email, opts ...grpc.CallOption) (*UserByEmail, error)
 	DeleteRefreshTokenByUserId(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*Void, error)
 	StoreRefreshToken(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*Void, error)
 	CheckRefreshTokenExists(ctx context.Context, in *RequestRefreshToken, opts ...grpc.CallOption) (*Void, error)
@@ -48,8 +48,8 @@ func (c *authServiceClient) Create(ctx context.Context, in *CreateUser, opts ...
 	return out, nil
 }
 
-func (c *authServiceClient) GetByEmail(ctx context.Context, in *Email, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
+func (c *authServiceClient) GetByEmail(ctx context.Context, in *Email, opts ...grpc.CallOption) (*UserByEmail, error) {
+	out := new(UserByEmail)
 	err := c.cc.Invoke(ctx, "/users.AuthService/GetByEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 // for forward compatibility
 type AuthServiceServer interface {
 	Create(context.Context, *CreateUser) (*User, error)
-	GetByEmail(context.Context, *Email) (*User, error)
+	GetByEmail(context.Context, *Email) (*UserByEmail, error)
 	DeleteRefreshTokenByUserId(context.Context, *PrimaryKey) (*Void, error)
 	StoreRefreshToken(context.Context, *RefreshToken) (*Void, error)
 	CheckRefreshTokenExists(context.Context, *RequestRefreshToken) (*Void, error)
@@ -123,7 +123,7 @@ type UnimplementedAuthServiceServer struct {
 func (UnimplementedAuthServiceServer) Create(context.Context, *CreateUser) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedAuthServiceServer) GetByEmail(context.Context, *Email) (*User, error) {
+func (UnimplementedAuthServiceServer) GetByEmail(context.Context, *Email) (*UserByEmail, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByEmail not implemented")
 }
 func (UnimplementedAuthServiceServer) DeleteRefreshTokenByUserId(context.Context, *PrimaryKey) (*Void, error) {

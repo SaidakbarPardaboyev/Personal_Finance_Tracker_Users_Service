@@ -42,5 +42,4 @@ func main() {
 	if err := server.Serve(listener); err != nil {
 		log.Fatal("Error with listening user server", logger.Error(err))
 	}
-
 }

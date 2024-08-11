@@ -6,6 +6,7 @@ import (
 	"users_service/storage"
 
 	pb "users_service/genproto/users"
+
 )
 
 type authService struct {
@@ -32,12 +33,12 @@ func (a *authService) Create(ctx context.Context, request *pb.CreateUser) (*pb.U
 	return resp, nil
 }
 
-func (a *authService) GetByEmail(ctx context.Context, request *pb.Email) (*pb.User, error) {
+func (a *authService) GetByEmail(ctx context.Context, request *pb.Email) (*pb.UserByEmail, error) {
 
 	resp, err := a.storage.Auth().GetByEmail(ctx, request)
 	if err != nil {
 		a.log.Error("error while getting user info by email in service layer", logger.Error(err))
-		return &pb.User{}, err
+		return &pb.UserByEmail{}, err
 	}
 
 	return resp, nil

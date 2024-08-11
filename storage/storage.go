@@ -24,7 +24,7 @@ type IStorage interface {
 
 type IAuthStorage interface {
 	Create(context.Context, *pb.CreateUser) (*pb.User, error)
-	GetByEmail(context.Context, *pb.Email) (*pb.User, error)
+	GetByEmail(context.Context, *pb.Email) (*pb.UserByEmail, error)
 	DeleteRefreshTokenByUserId(context.Context, *pb.PrimaryKey) (*pb.Void, error)
 	StoreRefreshToken(context.Context, *pb.RefreshToken) (*pb.Void, error)
 	CheckRefreshTokenExists(context.Context, *pb.RequestRefreshToken) (*pb.Void, error)

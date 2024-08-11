@@ -6,6 +6,8 @@ import (
 	"users_service/storage"
 
 	pb "users_service/genproto/users"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -77,6 +79,13 @@ func (u *userService) ChangePassword(ctx context.Context, request *pb.ChangePass
 		u.log.Error("error while current password is not correct in service layer", logger.Error(err))
 		return &pb.Void{}, err
 	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		u.log.Error("Error with hashing password", logger.Error(err))
+		return &pb.Void{}, err
+	}
+	request.NewPassword = string(hashedPassword)
 
 	resp, err := u.storage.Users().ChangePassword(ctx, request)
 	if err != nil {

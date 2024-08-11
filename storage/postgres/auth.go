@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 	"users_service/pkg/logger"
@@ -42,7 +41,6 @@ func (a *authRepo) Create(ctx context.Context, request *pb.CreateUser) (*pb.User
 	) values ($1, $2, $3, $4) returning 
 		id,
 		email,
-		password_hash,
 		full_name,
 		user_role,
 		created_at
@@ -56,7 +54,6 @@ func (a *authRepo) Create(ctx context.Context, request *pb.CreateUser) (*pb.User
 		Scan(
 			&user.Id,
 			&user.Email,
-			&user.Password,
 			&user.FullName,
 			&user.UserRole,
 			&createdAt,
@@ -70,10 +67,10 @@ func (a *authRepo) Create(ctx context.Context, request *pb.CreateUser) (*pb.User
 	return &user, nil
 }
 
-func (a *authRepo) GetByEmail(ctx context.Context, request *pb.Email) (*pb.User, error) {
+func (a *authRepo) GetByEmail(ctx context.Context, request *pb.Email) (*pb.UserByEmail, error) {
 
 	var (
-		user      = pb.User{}
+		user      = pb.UserByEmail{}
 		query     string
 		err       error
 		createdAt time.Time
@@ -83,8 +80,8 @@ func (a *authRepo) GetByEmail(ctx context.Context, request *pb.Email) (*pb.User,
 	select
 		id,
 		email,
-		password_hash,
 		full_name,
+		password_hash,
 		user_role,
 		created_at
 	from 
@@ -97,8 +94,8 @@ func (a *authRepo) GetByEmail(ctx context.Context, request *pb.Email) (*pb.User,
 	if err = a.db.QueryRow(ctx, query, request.GetEmail()).Scan(
 		&user.Id,
 		&user.Email,
-		&user.Password,
 		&user.FullName,
+		&user.Password,
 		&user.UserRole,
 		&createdAt,
 	); err != nil {
@@ -137,6 +134,7 @@ func (a *authRepo) StoreRefreshToken(ctx context.Context, request *pb.RefreshTok
 	var (
 		query string
 		err   error
+		// expiresIn time.Time
 	)
 
 	query = `
@@ -146,6 +144,10 @@ func (a *authRepo) StoreRefreshToken(ctx context.Context, request *pb.RefreshTok
 		expires_in
 	) values ($1, $2, $3)
 	`
+	// expiresIn, err = time.Parse(time.RFC3339, request.ExpiresIn)
+	// if err != nil {
+	// 	return &pb.Void{}, err
+	// }
 
 	if _, err = a.db.Exec(ctx, query,
 		request.UserId,
@@ -163,7 +165,7 @@ func (a *authRepo) CheckRefreshTokenExists(ctx context.Context, request *pb.Requ
 	var (
 		query string
 		err   error
-		exist = sql.NullInt64{}
+		exist int
 	)
 
 	query = `
@@ -175,14 +177,16 @@ func (a *authRepo) CheckRefreshTokenExists(ctx context.Context, request *pb.Requ
 			refresh_token = $1
 	`
 
-	if err = a.db.QueryRow(ctx, query, request.RefreshToken).Scan(&exist); err != nil {
-		a.log.Error("error user not found in users table", logger.Error(err))
+	err = a.db.QueryRow(ctx, query, request.RefreshToken).Scan(&exist)
+
+	if err != nil && err.Error() != "no rows in result set" {
+		a.log.Error("error while checking refresh token is exists", logger.Error(err))
 		return &pb.Void{}, err
 	}
 
-	if !exist.Valid || exist.Int64 != 1 {
-		a.log.Error("error user not found in users table")
-		return &pb.Void{}, fmt.Errorf("error user not found in users table")
+	if exist != 1 {
+		a.log.Error("error: refresh token not found in database")
+		return &pb.Void{}, fmt.Errorf("error: refresh token not found in database")
 	}
 
 	return &pb.Void{}, nil
@@ -190,13 +194,9 @@ func (a *authRepo) CheckRefreshTokenExists(ctx context.Context, request *pb.Requ
 
 func (a *authRepo) CheckEmailExists(ctx context.Context, request *pb.Email) (*pb.Void, error) {
 
-	var (
-		query string
-		err   error
-		exist = sql.NullInt64{}
-	)
+	var exist int
 
-	query = `
+	query := `
 		select
 			1
 		from
@@ -205,14 +205,15 @@ func (a *authRepo) CheckEmailExists(ctx context.Context, request *pb.Email) (*pb
 			email = $1
 	`
 
-	if err = a.db.QueryRow(ctx, query, request.Email).Scan(&exist); err != nil {
-		a.log.Error("error user not found in users table", logger.Error(err))
+	err := a.db.QueryRow(ctx, query, request.Email).Scan(&exist)
+	if err != nil && err.Error() != "no rows in result set" {
+		a.log.Error("error while checking if email exists", logger.Error(err))
 		return &pb.Void{}, err
 	}
 
-	if !exist.Valid || exist.Int64 != 1 {
-		a.log.Error("error user not found in users table")
-		return &pb.Void{}, fmt.Errorf("error user not found in users table")
+	if exist != 1 {
+		a.log.Error("error: email not found in database")
+		return &pb.Void{}, fmt.Errorf("email not found in database")
 	}
 
 	return &pb.Void{}, nil

@@ -2,13 +2,13 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 	"users_service/pkg/helper"
 	"users_service/pkg/logger"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 
 	pb "users_service/genproto/users"
 )
@@ -37,7 +37,6 @@ func (u *usersRepo) GetById(ctx context.Context, request *pb.PrimaryKey) (*pb.Us
 	query = `select
 		id,
 		email,
-		password_hash,
 		full_name,
 		user_role,
 		created_at
@@ -53,7 +52,6 @@ func (u *usersRepo) GetById(ctx context.Context, request *pb.PrimaryKey) (*pb.Us
 		Scan(
 			&user.Id,
 			&user.Email,
-			&user.Password,
 			&user.FullName,
 			&user.UserRole,
 			&createdAt,
@@ -101,7 +99,7 @@ func (u *usersRepo) GetAll(ctx context.Context, request *pb.GetListRequest) (*pb
 		countQuery += " and " + where[:len(where)-4]
 	}
 
-	if err := u.db.QueryRow(ctx, countQuery, args).Scan(&count); err != nil {
+	if err := u.db.QueryRow(ctx, countQuery, args...).Scan(&count); err != nil {
 		u.log.Error("error while taking count of users in storage layer", logger.Error(err))
 		return &pb.Users{}, err
 	}
@@ -109,7 +107,6 @@ func (u *usersRepo) GetAll(ctx context.Context, request *pb.GetListRequest) (*pb
 	query = `select
 		id,
 		email,
-		password_hash,
 		full_name,
 		user_role,
 		created_at
@@ -136,7 +133,6 @@ func (u *usersRepo) GetAll(ctx context.Context, request *pb.GetListRequest) (*pb
 		if err = rows.Scan(
 			&user.Id,
 			&user.Email,
-			&user.Password,
 			&user.FullName,
 			&user.UserRole,
 			&createdAt,
@@ -197,8 +193,7 @@ func (u *usersRepo) Update(ctx context.Context, request *pb.UpdateUser) (*pb.Upd
 		user_role,
 		updated_at
 	`
-	fullQuery, args := helper.ReplaceQueryParams(filter, params)
-
+	fullQuery, args := helper.ReplaceQueryParams(query, params)
 	if err = u.db.QueryRow(ctx, fullQuery, args...).Scan(
 		&user.Id,
 		&user.Email,
@@ -218,41 +213,46 @@ func (u *usersRepo) Update(ctx context.Context, request *pb.UpdateUser) (*pb.Upd
 
 func (u *usersRepo) Delete(ctx context.Context, request *pb.PrimaryKey) (*pb.Void, error) {
 
-	_, err := u.db.Exec(ctx, ` update users set deleted_at = null where id = $1`, request.GetId())
+	_, err := u.db.Exec(ctx, ` update users set deleted_at = now() where id = $1`, request.GetId())
 
 	return &pb.Void{}, err
 }
 
 func (u *usersRepo) CheckPasswordExisis(ctx context.Context, request *pb.ChangePassword) (bool, error) {
 
-	var (
-		exists = sql.NullInt64{}
-		query  string
-		err    error
-	)
+	var hashedPassword string
 
-	query = `
+	query := `
 		select
-			1
+			password_hash
 		from
 			users
-		where
-			id = $1 and password_hash = $2
 	`
 
-	if err = u.db.QueryRow(ctx, query,
-		request.GetUserId(),
-		request.GetCurrentPassword()).Scan(
-		&exists,
-	); err != nil {
-		u.log.Error("error while checking current password is currect in storage layer", logger.Error(err))
+	rows, err := u.db.Query(ctx, query)
+	if err != nil {
+		u.log.Error("error while retrieving hashed passwords from database", logger.Error(err))
 		return false, err
 	}
+	defer rows.Close()
 
-	if exists.Int64 == 0 {
-		return false, nil
+	for rows.Next() {
+		err = rows.Scan(&hashedPassword)
+		if err != nil {
+			u.log.Error("error while scanning hashed password", logger.Error(err))
+			return false, err
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(request.CurrentPassword))
+		if err == nil {
+			return true, nil
+		} else if err != bcrypt.ErrMismatchedHashAndPassword {
+			u.log.Error("error while comparing hashed password", logger.Error(err))
+			return false, err
+		}
 	}
-	return true, nil
+
+	return false, fmt.Errorf("password does not match any stored password")
 }
 
 func (u *usersRepo) ChangePassword(ctx context.Context, request *pb.ChangePassword) (*pb.Void, error) {

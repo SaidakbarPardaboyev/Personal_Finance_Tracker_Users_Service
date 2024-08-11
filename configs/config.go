@@ -71,7 +71,7 @@ func Load() *Config {
 	config.PostgresHost = cast.ToString(coalesce("POSTGRES_HOST", "localhost"))
 	config.PostgresPort = cast.ToString(coalesce("POSTGRES_PORT", "5432"))
 	config.PostgresUser = cast.ToString(coalesce("POSTGRES_USER", "postgres"))
-	config.PostgresName = cast.ToString(coalesce("POSTGRES_NAME", "language_leap_auth_service"))
+	config.PostgresName = cast.ToString(coalesce("POSTGRES_DBNAME", "language_leap_auth_service"))
 	config.PostgresPassword = cast.ToString(coalesce("POSTGRES_PASSWORD", "root"))
 
 	config.MongoDBHost = cast.ToString(coalesce("MONGODB_HOST", "localhost"))
