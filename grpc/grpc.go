@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	"auth_service/pkg/logger"
-	"auth_service/storage"
+	"users_service/pkg/logger"
+	"users_service/storage"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"auth_service/models"
-	"auth_service/pkg/logger"
+	"users_service/models"
+	"users_service/pkg/logger"
 	"context"
 	"database/sql"
 	"fmt"

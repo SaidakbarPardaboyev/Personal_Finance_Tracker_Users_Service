@@ -1,12 +1,14 @@
 package postgres
 
 import (
-	"auth_service/configs"
 	"context"
 	"fmt"
+	"users_service/configs"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+const Layout = "02.01.2006 15:04:05"
 
 func ConnectDB(ctx context.Context, cfg configs.Config) (*pgxpool.Pool, error) {
 	url := fmt.Sprintf(

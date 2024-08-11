@@ -1,0 +1,3 @@
+[submodule "Personal_Finance_Tracker_Protos"]
+	path = Personal_Finance_Tracker_Protos
+	url = git@github.com:SaidakbarPardaboyev/Personal_Finance_Tracker_Protos.git

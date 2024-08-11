@@ -12,16 +12,14 @@ type Config struct {
 	ApiGatewayHttpHost string
 	ApiGatewayHttpPort string
 
-	UserServiceHttpHost string
-	UserServiceHttpPort string
 	UserServiceGrpcHost string
 	UserServiceGrpcPort string
 
-	LearingServiceGrpcHost string
-	LearingServiceGrpcPort string
+	// LearingServiceGrpcHost string
+	// LearingServiceGrpcPort string
 
-	ProgresServiceGrpcHost string
-	ProgresServiceGrpcPort string
+	// ProgresServiceGrpcHost string
+	// ProgresServiceGrpcPort string
 
 	PostgresHost     string
 	PostgresPort     string
@@ -61,14 +59,14 @@ func Load() *Config {
 
 	config.UserServiceGrpcHost = cast.ToString(coalesce("USER_SERVICE_GRPC_HOST", "localhost"))
 	config.UserServiceGrpcPort = cast.ToString(coalesce("USER_SERVICE_GRPC_PORT", ":1111"))
-	config.UserServiceHttpHost = cast.ToString(coalesce("USER_SERVICE_HTTP_HOST", "localhost"))
-	config.UserServiceHttpPort = cast.ToString(coalesce("USER_SERVICE_HTTP_PORT", ":2222"))
+	// config.UserServiceHttpHost = cast.ToString(coalesce("USER_SERVICE_HTTP_HOST", "localhost"))
+	// config.UserServiceHttpPort = cast.ToString(coalesce("USER_SERVICE_HTTP_PORT", ":2222"))
 
-	config.LearingServiceGrpcHost = cast.ToString(coalesce("LEARNING_SERVICE_GRPC_HOST", "localhost"))
-	config.LearingServiceGrpcPort = cast.ToString(coalesce("LEARNING_SERVICE_GRPC_PORT", ":3333"))
+	// config.LearingServiceGrpcHost = cast.ToString(coalesce("LEARNING_SERVICE_GRPC_HOST", "localhost"))
+	// config.LearingServiceGrpcPort = cast.ToString(coalesce("LEARNING_SERVICE_GRPC_PORT", ":3333"))
 
-	config.ProgresServiceGrpcHost = cast.ToString(coalesce("PROGRESS_SERVICE_GRPC_HOST", "localhost"))
-	config.ProgresServiceGrpcPort = cast.ToString(coalesce("PROGRESS_SERVICE_GRPC_PORT", ":4444"))
+	// config.ProgresServiceGrpcHost = cast.ToString(coalesce("PROGRESS_SERVICE_GRPC_HOST", "localhost"))
+	// config.ProgresServiceGrpcPort = cast.ToString(coalesce("PROGRESS_SERVICE_GRPC_PORT", ":4444"))
 
 	config.PostgresHost = cast.ToString(coalesce("POSTGRES_HOST", "localhost"))
 	config.PostgresPort = cast.ToString(coalesce("POSTGRES_PORT", "5432"))

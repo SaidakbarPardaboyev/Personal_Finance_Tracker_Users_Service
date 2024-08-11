@@ -1,8 +1,8 @@
 package jwt
 
 import (
-	"auth_service/configs"
-	"auth_service/models"
+	"users_service/configs"
+	"users_service/models"
 	"fmt"
 	"net/smtp"
 	"time"
