@@ -11,6 +11,7 @@ import (
 type userService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	pb.UnimplementedUsersServiceServer
 }
 
 func NewUsersService(storage storage.IStorage, log logger.ILogger) *userService {

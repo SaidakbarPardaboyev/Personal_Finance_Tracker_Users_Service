@@ -5,6 +5,7 @@ import (
 	"users_service/configs"
 	"users_service/grpc"
 	"users_service/pkg/logger"
+	"users_service/service"
 	"users_service/storage"
 
 	"fmt"
@@ -24,6 +25,9 @@ func main() {
 	}
 	defer storage.Close()
 
+	services := service.NewServiceManager(storage, log)
+	server := grpc.SetUpServer(services, log)
+
 	listener, err := net.Listen("tcp",
 		cfg.UserServiceGrpcHost+cfg.UserServiceGrpcPort,
 	)
@@ -32,8 +36,6 @@ func main() {
 		return
 	}
 	defer listener.Close()
-
-	server := grpc.SetUpServer(&storage, log)
 
 	fmt.Printf("User service is listening on port %s...\n",
 		cfg.UserServiceGrpcHost+cfg.UserServiceGrpcPort)
